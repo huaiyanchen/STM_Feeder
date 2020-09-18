@@ -1,0 +1,112 @@
+#ifndef __FM24CL_H__
+#define __FM24CL_H__
+
+#include <stm32f10x.h>
+#include "userCommon.h"
+#include "app_main.h"
+
+/************************** FM24CL *************************************/
+#define uv16 rt_uint16_t
+#define uv8 rt_uint8_t
+
+#define FRAM_HARD_DEFAULT		0
+//addr
+#define FRAM_STAT_ADDR				        0x0000	
+#define FRAM_APP_MARK_ADDR				    0x0001	
+
+#define FRAM_ADDR_IMEI                      0x0010
+#define FRAM_ADDR_ORDER_ID					FRAM_ADDR_IMEI+20 //6 bytes
+#define FRAM_ADDR_SOCKET_STT				FRAM_ADDR_ORDER_ID+6*APP_SOCKET_NUM //1 byte
+#define FRAM_ADDR_CHARGE_TYPE				FRAM_ADDR_SOCKET_STT+APP_SOCKET_NUM //1 byte
+#define FRAM_ADDR_ADD_TIMES					FRAM_ADDR_CHARGE_TYPE+APP_SOCKET_NUM //1 byte
+#define FRAM_ADDR_AUTO_STOP_INFO			FRAM_ADDR_ADD_TIMES+APP_SOCKET_NUM //1 byte
+#define FRAM_ADDR_RUN_TIME					FRAM_ADDR_AUTO_STOP_INFO+APP_SOCKET_NUM //2 bytes
+#define FRAM_ADDR_REST_TIME					FRAM_ADDR_RUN_TIME+2*APP_SOCKET_NUM 	//2 bytes
+#define FRAM_ADDR_RUN_VOL					FRAM_ADDR_REST_TIME+2*APP_SOCKET_NUM 	//2 bytes
+#define FRAM_ADDR_REST_VOL					FRAM_ADDR_RUN_VOL+2*APP_SOCKET_NUM 		//2 bytes
+#define FRAM_ADDR_RUN_CASH					FRAM_ADDR_REST_VOL+2*APP_SOCKET_NUM 	//2 bytes
+#define FRAM_ADDR_REST_CASH					FRAM_ADDR_RUN_CASH+2*APP_SOCKET_NUM	 	//2 bytes
+#define FRAM_ADDR_AVG_W						FRAM_ADDR_REST_CASH+2*APP_SOCKET_NUM	//2 bytes
+#define FRAM_ADDR_MAX_W						FRAM_ADDR_AVG_W+2*APP_SOCKET_NUM		//2 bytes
+#define FRAM_ADDR_CARD_ID					FRAM_ADDR_MAX_W+2*APP_SOCKET_NUM		//4 bytes
+#define FRAM_ADDR_CARD_TYPE					FRAM_ADDR_CARD_ID+4*APP_SOCKET_NUM		//1 byte
+#define FRAM_ADDR_NOLOAD_TIME				FRAM_ADDR_CARD_TYPE+APP_SOCKET_NUM		//1 byte
+#define FRAM_ADDR_FULL_TIME					FRAM_ADDR_NOLOAD_TIME+APP_SOCKET_NUM		//2 bytes
+#define FRAM_ADDR_OVER_POWER_TICK			FRAM_ADDR_FULL_TIME+2*APP_SOCKET_NUM		//1 byte
+#define FRAM_ADDR_POWER_SHIFT				FRAM_ADDR_OVER_POWER_TICK+APP_SOCKET_NUM	//1 byte
+#define FRAM_ADDR_SET_FLG					FRAM_ADDR_POWER_SHIFT+APP_SOCKET_NUM		//1 byte
+#define FRAM_ADDR_FULL_POWER				FRAM_ADDR_SET_FLG+APP_SOCKET_NUM			//1 byte
+#define FRAM_ADDR_FULL_TIMER				FRAM_ADDR_FULL_POWER+APP_SOCKET_NUM			//1 byte
+#define FRAM_ADDR_MIN_CALC_UNIT				FRAM_ADDR_FULL_TIMER+APP_SOCKET_NUM			//1 byte
+#define FRAM_ADDR_PRE_PAYMENT				FRAM_ADDR_MIN_CALC_UNIT+APP_SOCKET_NUM		//2 bytes
+#define FRAM_ADDR_PW_LEV1					FRAM_ADDR_PRE_PAYMENT+2*APP_SOCKET_NUM		//2 bytes
+#define FRAM_ADDR_PARAM_LEV1				FRAM_ADDR_PW_LEV1+2*APP_SOCKET_NUM			//2 bytes
+#define FRAM_ADDR_PW_LEV2					FRAM_ADDR_PARAM_LEV1+2*APP_SOCKET_NUM		//2 bytes
+#define FRAM_ADDR_PARAM_LEV2				FRAM_ADDR_PW_LEV2+2*APP_SOCKET_NUM			//2 bytes
+#define FRAM_ADDR_PW_LEV3					FRAM_ADDR_PARAM_LEV2+2*APP_SOCKET_NUM		//2 bytes
+#define FRAM_ADDR_PARAM_LEV3				FRAM_ADDR_PW_LEV3+2*APP_SOCKET_NUM			//2 bytes
+#define FRAM_ADDR_PW_LEV4					FRAM_ADDR_PARAM_LEV3+2*APP_SOCKET_NUM		//2 bytes
+#define FRAM_ADDR_PARAM_LEV4				FRAM_ADDR_PW_LEV4+2*APP_SOCKET_NUM			//2 bytes
+
+//#define FRAM_ADDR_ENCRYT                    0x0020
+//
+//#define FRAM_ADDR_RATE_MARK                 0x0030 //1 byte
+//#define FRAM_ADDR_CONSUMER_SECTOR           0x0031 //
+//
+//#define FRAM_ADDR_CONSUMER_KEY              0x0040
+//#define FRAM_ADDR_MIN_CALC_RATE             0x0050 //1 byte
+//#define FRAM_ADDR_RATE1                     0x0060
+//#define FRAM_ADDR_RATE2                     0x0070
+//#define FRAM_ADDR_RATE3                     0x0080
+//#define FRAM_ADDR_RATE4                     0x0090
+//#define FRAM_ADDR_FULL_POWER                0x00A0
+//#define FRAM_ADDR_FULL_POWER_TIME           0x00B0
+//#define FRAM_ADDR_MAX_POWER_1               0x00C0
+//#define FRAM_ADDR_MAX_POWER_2               0x00D0
+//#define FRAM_ADDR_MAX_POWER_3               0x00E0
+//#define FRAM_ADDR_MAX_POWER_4               0x00F0
+//#define FRAM_ADDR_PRE_PAYMENT               0x0100
+//
+//#define FRAM_ADDR_CHARGE_SUPP_MODE          0x0120
+//#define FRAM_ADDR_AGENT_ID                  0x0135  //2 bytes
+//#define FRAM_ADDR_OVER_POWER                0x0137  //2 bytes
+//
+//#define FLASH_ADDR_REFUND_NUM				0x0140 //1byte
+//#define FLASH_ADDR_CARD_ID					FLASH_ADDR_REFUND_NUM+1 //4byte
+//#define FLASH_ADDR_CHARGE_STT				FLASH_ADDR_CARD_ID+4*MAX_PILE_ADAPTER_NUM //1byte
+//#define FLASH_ADDR_REST_MONEY				FLASH_ADDR_CHARGE_STT+MAX_PILE_ADAPTER_NUM   //4 byte
+//#define FLASH_ADDR_FULL_TIME				FLASH_ADDR_REST_MONEY+4*MAX_PILE_ADAPTER_NUM //2 byte
+//#define FLASH_ADDR_REST_TIME				FLASH_ADDR_FULL_TIME+2*MAX_PILE_ADAPTER_NUM  //2 byte
+//#define FLASH_ADDR_RUN_TIME					FLASH_ADDR_REST_TIME+2*MAX_PILE_ADAPTER_NUM  //2 byte
+//#define FLASH_ADDR_NOLOAD_TIME				FLASH_ADDR_RUN_TIME+2*MAX_PILE_ADAPTER_NUM   //1 byte
+//#define FLASH_ADDR_REST_KWH					FLASH_ADDR_NOLOAD_TIME+MAX_PILE_ADAPTER_NUM  //4 byte
+//#define FLASH_ADDR_CHARGE_KWH				FLASH_ADDR_REST_KWH+4*MAX_PILE_ADAPTER_NUM	 //4 byte
+//
+//#define FLASH_ADDR_REFUND_ID_MONEY			FLASH_ADDR_CHARGE_KWH+4*MAX_PILE_ADAPTER_NUM //8byte 100 records
+////#define FLASH_ADDR_CHARGE_STT				FLASH_ADDR_REFUND_ID_MONEY+8*100 //1 byte
+//
+//
+//#define FRAM_ADDR_CHARGE_STT                0x0140 //1byte
+//#define FRAME_ADDR_CHARGE_TYPE            FRAM_ADDR_CHARGE_STT+MAX_PILE_ADAPTER_NUM //1byte 0x14a
+//#define FRAME_ADDR_UID_SOCKET             FRAME_ADDR_CHARGE_TYPE+MAX_PILE_ADAPTER_NUM//5byte 0x154
+//#define FRAME_ADDR_CHARGE_TIME_MONEY      FRAME_ADDR_UID_SOCKET+5*MAX_PILE_ADAPTER_NUM//6byte 0x186
+//#define FRAME_ADDR_CHARGE_FULL_TIME       FRAME_ADDR_CHARGE_TIME_MONEY+6*MAX_PILE_ADAPTER_NUM//2byte  0x1c2
+//#define FRAME_ADDR_REFUND_UID_MONEY       FRAME_ADDR_CHARGE_FULL_TIME+2*MAX_PILE_ADAPTER_NUM //8byte 100¸ö 0x4f6
+//#define FRAME_ADDR_REFUND_INDEX           FRAME_ADDR_REFUND_UID_MONEY+8*100 //1byte
+//#define FRAME_ADDR_REFUND_NUM             FRAME_ADDR_REFUND_INDEX+1 //1byte
+//#define FRAME_ADDR_CARD_TOTAL_MONEY       FRAME_ADDR_REFUND_NUM+1 //4byte
+//#define FRAME_ADDR_CARD_INFO              FRAME_ADDR_CARD_TOTAL_MONEY+4 //14bytes 10¸ö
+//#define FRAME_ADDR_SYS_TIME               FRAME_ADDR_CARD_INFO+14*MAX_PILE_ADAPTER_NUM //7byte
+//#define FRAME_ADDR_SETTING_PARAM          FRAME_ADDR_SYS_TIME+7 //3byte
+//#define FRAME_ADDR_TOTAL_COIN_NUM         FRAME_ADDR_SETTING_PARAM+3 //2byte
+//#define FRAME_ADDR_RUN_TIME		          FRAME_ADDR_TOTAL_COIN_NUM+2 //2byte
+//#define FRAME_ADDR_SUM_KWH				  FRAME_ADDR_RUN_TIME+2*MAX_PILE_ADAPTER_NUM
+//0x800
+
+void rt_hw_fm24cl_init();
+
+rt_uint8_t FM_WrData(rt_uint16_t startAddr, rt_uint8_t *buff, rt_uint16_t len);
+rt_uint8_t FM_RdData(rt_uint16_t startAddr, rt_uint8_t *buff, rt_uint16_t len);
+rt_uint8_t FM_ClearArea(rt_uint16_t startAddr, rt_uint16_t len);
+
+#endif

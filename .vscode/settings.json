@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "usercommon.h": "c",
+        "fm24clxx.h": "c"
+    }
+}
